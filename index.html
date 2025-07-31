@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Princy Gautam | Business Analyst</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+                max-height: 60vh;
+            }
+        }
+        .skill-chart-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+        }
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .nav-link {
+            @apply text-gray-600 hover:text-blue-600 transition-colors duration-200;
+        }
+        .nav-link.active {
+            @apply text-blue-700 font-semibold border-b-2 border-blue-700;
+        }
+        .insight-text {
+            min-height: 50px; /* Ensure space for insight */
+            background-color: #e0f2fe; /* Light blue background for insights */
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: #0c4a6e;
+            border: 1px solid #90cdf4;
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 800px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s ease-in-out;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #4a5568;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #2d3748;
+        }
+        .modal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #2d3748;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+        .modal-content p, .modal-content li {
+             color: #4a5568;
+             line-height: 1.6;
+        }
+        .modal-content ul {
+            list-style-position: inside;
+            margin-left: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .modal-content li {
+            margin-bottom: 0.5rem;
+        }
+         .modal-content code {
+            background-color: #e2e8f0;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="header" class="glassmorphism sticky top-0 z-50 transition-shadow duration-300 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-xl font-bold text-gray-800">Princy Gautam</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="#achievements" class="nav-link">Achievements</a>
+                <a href="#experience" class="nav-link">Experience</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#skills" class="nav-link">Skills</a>
+                <a href="#education" class="nav-link">Education</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-gray-800 focus:outline-none">
+                <canvas id="hamburger-icon" width="24" height="24"></canvas>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#achievements" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Achievements</a>
+            <a href="#experience" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Experience</a>
+            <a href="#projects" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Projects</a>
+            <a href="#skills" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Skills</a>
+            <a href="#education" class="block py-2 px-6 text-sm text-gray-700 hover:bg-gray-200">Education</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="min-h-screen flex items-center bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight">Princy Gautam</h1>
+                <p class="text-xl md:text-2xl text-blue-600 font-medium mt-2">Business Analyst</p>
+                <p class="mt-6 max-w-3xl mx-auto text-gray-600 text-lg">
+                    Results-driven professional with over a year of experience in data analysis, process automation, and dashboard development. Proven ability to leverage programming languages like Python and SQL to develop predictive models, automate tasks, and optimize workflows, resulting in increased efficiency and revenue growth.
+                </p>
+                <div class="mt-8 flex flex-wrap justify-center items-center gap-4">
+                    <a href="mailto:princygautam@gmail.com" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+                        <span>Contact Me</span>
+                    </a>
+                    <a href="https://github.com/PrincyGit" target="_blank" class="bg-gray-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-800 transition-transform transform hover:scale-105 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-github"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>
+                        <span>GitHub</span>
+                    </a>
+                    <a href="tel:+917668701994" class="bg-green-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105 flex items-center space-x-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        <span>(+91) 7668701994</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="achievements" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Key Achievements</h2>
+                <p class="text-center text-gray-600 mb-8 max-w-2xl mx-auto">This section highlights my most impactful, quantifiable contributions in my work experience. Interact with the chart to understand the specific business context and results of each achievement.</p>
+                <div class="chart-container bg-white p-4 rounded-xl shadow-lg mb-8">
+                    <canvas id="achievementsChart"></canvas>
+                </div>
+                <div id="achievement-description" class="bg-white p-6 rounded-xl shadow-lg max-w-3xl mx-auto text-gray-700 text-center min-h-[80px] flex items-center justify-center">
+                    <p>Hover over or click a bar in the chart above to learn more about each achievement.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="experience" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Work Experience</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">My professional journey reflects a commitment to leveraging data and automation for tangible business impact. Explore my roles and responsibilities below.</p>
+                <div class="relative border-l-2 border-blue-200 pl-10">
+                    <div class="mb-12">
+                        <div class="absolute w-4 h-4 bg-blue-600 rounded-full -left-2 mt-1.5"></div>
+                        <p class="text-sm text-gray-500">Jul'24 - Present</p>
+                        <h3 class="text-xl font-semibold text-gray-800">Data Analysis | Cogoport</h3>
+                        <ul class="mt-2 list-disc list-inside text-gray-600 space-y-1">
+                            <li>Developed a predictive pricing model for 20,000+ port pairs, raising conversion by 66% and profit by 8.2%.</li>
+                            <li>Built and deployed 9 real-time KPI dashboards using SQL to track 25 shipment health metrics.</li>
+                        </ul>
+                    </div>
+                    <div class="mb-12">
+                        <div class="absolute w-4 h-4 bg-blue-600 rounded-full -left-2 mt-1.5"></div>
+                        <p class="text-sm text-gray-500">Jul'24 - Present (Concurrent Role)</p>
+                        <h3 class="text-xl font-semibold text-gray-800">Process Automation &amp; Workflow Optimization | Cogoport</h3>
+                        <ul class="mt-2 list-disc list-inside text-gray-600 space-y-1">
+                            <li>Automated rate revert task, achieving 60% fulfillment and generating $11.5 million in annual revenue.</li>
+                            <li>Designed pricing SOPs across 15+ services, resulting in a 12% revenue boost.</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <div class="absolute w-4 h-4 bg-blue-600 rounded-full -left-2 mt-1.5"></div>
+                        <p class="text-sm text-gray-500">May'23 - Jul'23</p>
+                        <h3 class="text-xl font-semibold text-gray-800">Finance Analyst | TalentServe EduTech.</h3>
+                        <ul class="mt-2 list-disc list-inside text-gray-600 space-y-1">
+                           <li>Optimized parameters to measure financial model across 8+ edtech startups to improve sustainable revenue growth by 2.3%.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Projects</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">Here are some key projects where I applied my analytical and technical skills to solve real-world problems and derive actionable insights.</p>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Credit Card Fraud Detection</h3>
+                        <p class="text-gray-600 mb-4 project-description">Built a Logistic Regression model with 90% accuracy to detect fraudulent transactions using imbalanced datasets. Preprocessed data with outlier detection, under-sampling, and feature scaling.</p>
+                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="fraud-detection">View Approach</button>
+                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Customer Segmentation</h3>
+                        <p class="text-gray-600 mb-4 project-description">Built a K-Means clustering model to segment customers, enabling targeted marketing based on spending data. Analyzed cluster inertia using the Elbow method to find the optimal number of clusters.</p>
+                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="customer-segmentation">View Approach</button>
+                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
+                        <h3 class="text-xl font-semibold mb-2">Snapdeal Competitive Analysis</h3>
+                        <p class="text-gray-600 mb-4 project-description">Performed cross-platform data comparison, analyzing categories, inventory, and discount metrics. Analyzed historical prices to identify trends and generate business hypotheses.</p>
+                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="snapdeal-analysis">View Approach</button>
+                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Technical Skills</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">My diverse technical skillset enables me to tackle complex data challenges, from programming and database management to advanced data visualization and analytical tools.</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4 text-center md:text-left">Programming &amp; Databases</h3>
+                        <p class="text-gray-600 mb-6 text-center md:text-left">Strong foundation in core programming languages and database management systems, essential for backend development, data manipulation, and analysis.</p>
+                        <div class="skill-chart-container bg-white p-4 rounded-xl shadow-lg">
+                            <canvas id="programmingSkillsChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="text-xl font-semibold mb-4 text-center md:text-left">Data Tools &amp; Platforms</h3>
+                        <p class="text-gray-600 mb-6 text-center md:text-left">Proficient with a modern stack of data science and visualization tools to extract insights, build models, and create compelling reports.</p>
+                        <div class="skill-chart-container bg-white p-4 rounded-xl shadow-lg">
+                           <canvas id="dataToolsSkillsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="py-20 bg-gray-50">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-4">Education &amp; Leadership</h2>
+                <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">Beyond my technical expertise, my academic background and leadership roles have honed my problem-solving and team collaboration abilities.</p>
+                <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-10 md:items-start">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Education</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-bold">B.Tech. - IIT Jodhpur</p>
+                                <p class="text-sm text-gray-600">2024 | CGPA: 7.17</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">12th Class - CBSE Board</p>
+                                <p class="text-sm text-gray-600">2019 | Percentage: 90%</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">10th Class - CBSE Board</p>
+                                <p class="text-sm text-gray-600">2017 | Grade: 10</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-gray-800 mb-4">Positions of Responsibility</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="font-bold">Digital Marketing Head, IGNUS Cultural Fest</p>
+                                <p class="text-sm text-gray-600">Feb '24 | IIT Jodhpur</p>
+                                <p class="text-sm text-gray-600">Led digital marketing, secured INR 6 Lakhs sponsorship, attracted 1300+ footfall.</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">Vice-Captain, IITJ Basketball Team</p>
+                                <p class="text-sm text-gray-600">Jul '23 - Mar '24 | IIT Jodhpur</p>
+                                <p class="text-sm text-gray-600">Coordinated 60+ game strategies, motivating teammates.</p>
+                            </div>
+                            <div>
+                                <p class="font-bold">Events Asst. Head, PROMETEO Tech Fest</p>
+                                <p class="text-sm text-gray-600">Feb '22 | IIT Jodhpur</p>
+                                <p class="text-sm text-gray-600">Managed budgets and collaborated to organize 10+ events.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Princy Gautam. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Modal for Fraud Detection Project -->
+    <div id="fraud-detection-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Credit Card Fraud Detection: Detailed Approach</h2>
+            <p class="mb-4">Alright, let's break down this credit card fraud detection project step by step, just like I'm talking you through it.</p>
+            <h3>1. Project Overview</h3>
+            <p>First off, the whole point of this project is to build a system that can spot fraudulent credit card transactions. We're working with a dataset that has a ton of regular transactions and a much smaller number of fraudulent ones – it's pretty imbalanced, which is a common challenge in these kinds of problems.</p>
+            <h3>2. Data Pre-processing and Exploration</h3>
+            <ul>
+                <li>We started by bringing in all the necessary tools: <code>numpy</code> and <code>pandas</code> for handling the data, <code>matplotlib</code> and <code>seaborn</code>, and then some really important stuff from <code>sklearn</code> for splitting our data, running our model, and checking how well it performed.</li>
+                <li>We loaded up our credit card data from a CSV file, called <code>creditcard.csv</code>.</li>
+                <li>Then, we took a quick peek at the data using <code>head()</code> and <code>tail()</code>. A crucial step was using <code>info()</code> to see the data types and if there were any missing pieces. Turns out, some columns had one missing value each. We confirmed this with <code>isnull().sum()</code>.</li>
+                <li>Since we can't have missing data, we just dropped those rows using <code>dropna()</code>. It's a quick fix for this small number of missing values.</li>
+                <li>Next, we checked the 'Class' column to see how many transactions were legitimate (0.0) and how many were fraudulent (1.0). It was super imbalanced: 11906 legitimate vs. only 52 fraudulent.</li>
+                <li>We also looked at the 'Amount' field and grouped the data by 'Class' and took the mean of all columns, to get a good sense of how the average values of the features differed between legitimate and fraudulent transactions.</li>
+            </ul>
+            <h3>3. Addressing Imbalanced Data (Under-sampling)</h3>
+            <p>Because of that huge imbalance, we used a technique called **under-sampling**. We took a random sample of 52 legitimate transactions – the same number as our fraudulent ones. Then, we combined this smaller set with all the fraudulent ones to create a new, balanced dataset. Now it's perfectly balanced: 52 legitimate and 52 fraudulent transactions.</p>
+            <h3>4. Model Training</h3>
+            <ul>
+                <li>Now that our data was prepped, we split it into features (x) and our target (y).</li>
+                <li>We further split these into training (90%) and testing (10%) sets. We used <code>stratify=y</code> to make sure the proportion of fraud vs. non-fraud was the same in both sets.</li>
+                <li>For our model, we chose **Logistic Regression**. We initialized the model and then fit it to our training data. A "ConvergenceWarning" popped up, which often points to the need for scaling the data.</li>
+            </ul>
+            <h3>5. Model Evaluation</h3>
+            <ul>
+                <li>We made predictions on our training data and got an accuracy of about **98.92%**.</li>
+                <li>More importantly, we made predictions on our test data (data the model has never seen before) and got an accuracy of about **81.82%**.</li>
+            </ul>
+            <h3>6. Insights and Potential Improvements</h3>
+            <p>The under-sampling helped, but the accuracy drop on test data hints at some overfitting. That warning is also a clue.</p>
+            <ul>
+                <li><strong>Data Scaling:</strong> This should help the Logistic Regression model converge better and potentially improve its performance.</li>
+                <li><strong>Other Algorithms:</strong> Maybe a Random Forest or Gradient Boosting would perform better.</li>
+                <li><strong>Look beyond accuracy:</strong> For fraud detection, **precision** and **recall** are often more important. The F1-score and AUC-ROC are also great metrics.</li>
+                <li><strong>Consider over-sampling (like SMOTE):</strong> Instead of throwing away data, we could generate synthetic fraud examples to balance the dataset.</li>
+                <li><strong>Hyperparameter tuning:</strong> We could play around with the model's settings to squeeze out more performance.</li>
+                <li><strong>Cross-validation:</strong> This would give us a more stable and reliable estimate of how well our model generalizes.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Modal for Customer Segmentation Project -->
+    <div id="customer-segmentation-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Customer Segmentation: Detailed Approach</h2>
+            <p class="mb-4">The <code>Mall_Customers.csv</code> file contains customer data from a mall, including demographics like Gender and Age, along with Annual Income and a Spending Score. This dataset is likely used to understand different customer groups based on their purchasing behavior.</p>
+            <h3>1. Project Overview</h3>
+            <p>The main goal of this project is to divide mall customers into distinct groups, or "segments," based on their purchasing habits and demographic information. This kind of segmentation helps businesses understand their customer base better, allowing for more targeted marketing and personalized strategies. We'll be using a clustering algorithm to achieve this, as we don't have predefined labels for our customer groups.</p>
+            <h3>2. Data Pre-processing and Exploration</h3>
+            <ul>
+                <li>First things first, we brought in our essential Python libraries: <code>numpy</code> for numerical operations, <code>pandas</code> for data manipulation, <code>matplotlib.pyplot</code> and <code>seaborn</code> for creating some nice visualizations, and <code>KMeans</code> from <code>sklearn.cluster</code> for our clustering algorithm.</li>
+                <li>We loaded our customer data from the <code>Mall_Customers.csv</code> file into a pandas DataFrame, which we called <code>customer_data</code>.</li>
+                <li>Then, we took a good look at our data to understand it. <code>customer_data.head()</code> gave us a quick peek at the first few rows, showing us what kind of information we have. <code>customer_data.shape</code> confirmed the number of rows and columns, giving us a sense of the dataset's size. <code>customer_data.info()</code> was really useful for checking data types and, critically, for seeing if there were any missing values. Thankfully, in this dataset, it looks like there were no null values, which is great – one less thing to worry about! Finally, <code>customer_data.describe()</code> provided a statistical summary of our numerical columns, giving us insights into the range and distribution of age, income, and spending score.</li>
+                <li>For this segmentation, we decided to focus on Annual Income (k$) and Spending Score (1-100) because these two features are highly relevant for understanding customer value and behavior. We extracted these two columns into a new variable <code>X</code>.</li>
+            </ul>
+            <h3>3. Determining Optimal Clusters (Elbow Method)</h3>
+            <p>Since we're doing unsupervised learning (meaning we don't have existing labels for our customer segments), we need a way to figure out the "best" number of clusters. The Elbow Method is a common technique for this. We calculated the "Within Cluster Sum of Squares" (WCSS) for a range of possible cluster numbers (from 1 to 10). WCSS essentially measures how compact the clusters are; a lower WCSS generally means better clusters. Then, we plotted the WCSS values against the number of clusters. The idea is to look for an "elbow point" in the graph – where the rate of decrease in WCSS significantly slows down. This point usually indicates the optimal number of clusters, as adding more clusters beyond this point doesn't give you much more compactness. From the plot, the elbow appeared to be at 5 clusters.</p>
+            <h3>4. Model Training</h3>
+            <p>With the optimal number of clusters identified as 5, we were ready to train our K-Means model. We initialized the <code>KMeans</code> algorithm with <code>n_clusters=5</code>, specifying that we want five distinct customer groups. We also set <code>init='k-means++'</code> (a smart way to pick initial cluster centers that speeds up convergence) and <code>random_state=42</code> for reproducibility (so we get the same results every time we run the code). Then, we trained the model by fitting it to our <code>X</code> data (the Annual Income and Spending Score). After training, the model learned the optimal cluster centers and assigned each data point to one of these five clusters. We stored these cluster assignments in a new column called <code>Cluster</code> in our original <code>customer_data</code> DataFrame.</p>
+            <h3>5. Visualization and Insights</h3>
+            <p>The best way to understand our customer segments is to visualize them. We used <code>matplotlib.pyplot</code> to create a scatter plot. We plotted Annual Income (k$) on the x-axis and Spending Score (1-100) on the y-axis. Crucially, we colored each data point based on its assigned cluster. This immediately allowed us to see the distinct groups. Looking at the plot, we can now interpret the segments:</p>
+            <ul>
+                <li><strong>Cluster 0 (e.g., green):</strong> Customers with moderate income but high spending scores. These are likely impulse buyers or trend followers.</li>
+                <li><strong>Cluster 1 (e.g., red):</strong> Customers with high income and high spending scores. These are our "prime" or "target" customers – they earn a lot and spend a lot.</li>
+                <li><strong>Cluster 2 (e.g., blue):</strong> Customers with low income and low spending scores. These might be budget-conscious shoppers or new customers.</li>
+                <li><strong>Cluster 3 (e.g., purple):</strong> Customers with low income but high spending scores. This group is interesting; they might be looking for deals or spending disproportionately to their income.</li>
+                <li><strong>Cluster 4 (e.g., orange):</strong> Customers with high income but low spending scores. These are high earners who are cautious spenders at the mall, perhaps saving or spending elsewhere.</li>
+            </ul>
+        </div>
+    </div>
+    
+    <!-- Modal for Snapdeal Analysis Project -->
+    <div id="snapdeal-analysis-modal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Snapdeal Competitive Analysis: Detailed Approach</h2>
+            
+            <h3>Project Overview</h3>
+            <p>Hi! So, I recently worked on a fun little project analyzing some e-commerce data. The main goal was to take a look at product listings from Snapdeal and see how they stack up against major competitors like Amazon, Flipkart, and Paytm. I wanted to understand their product availability, pricing strategies, and stock status across different categories.</p>
+            
+            <h3>The Data and The Cleanup</h3>
+            <p>I started with a CSV file that had a bunch of product data scraped from these different e-commerce sites. It included details like the product title, brand, category, URL, and most importantly the daily selling price for the first eight days of January 2024. As with any real-world data, it was a bit messy at first. So, the first big step was data pre-processing and cleaning.</p>
+            <ul>
+                <li><strong>Handling Errors and Missing Values:</strong> Some rows had errors like #NAME? for the product ID, so I filtered those out right away. A lot of the prices were listed as -1, which I assumed meant the product was out of stock or the price wasn't available on that day. I decided to drop any product listing that had a -1 or 0 price on any of the eight days to make sure I was only working with consistently available products.</li>
+                <li><strong>Standardizing Categories:</strong> This was a big one. The 'Category' column was all over the place. For example, "TVs, Audio & Video," "TVs, Audio \u0026 Video," and "TVS,AUDIO & VIDEO" were all listed separately. I grouped all these similar-sounding categories into single, clean categories like "TVs Audio & Video" and "Computers & Components." This made it much easier to compare apples to apples.</li>
+                <li><strong>Cleaning Up Stock Status:</strong> The 'Stock' column had the same issue. There were tons of variations like "In Stock," "instock," "Available," "Out of Stock," and "Out of Stock!". I consolidated these into simple, uniform statuses: 'In Stock', 'Out of Stock', 'In Stock - only few left', and 'NA' for anything else or missing data.</li>
+            </ul>
+
+            <h3>Feature Engineering and Analysis</h3>
+            <p>Once the data was clean, I moved on to the analysis. Since this was an analytical project, I didn't train any machine learning models, but I did use Python libraries like pandas for data manipulation and Matplotlib and Seaborn for visualizations. The "algorithms" used were mainly for data aggregation and comparison. My main analytical steps were:</p>
+            <ul>
+                <li><strong>Creating a Baseline Price:</strong> The daily prices for products fluctuated. To create a stable point of comparison, I made a new column called 'Original Price'. For each product, I set this as the highest price observed over the eight-day period. This gave me a baseline to calculate discounts against.</li>
+                <li><strong>Calculating Discounts:</strong> With the 'Original Price' set, I created another column called 'Max Discount'. This calculated the biggest discount percentage offered for each product listing during that week.</li>
+                <li><strong>Comparing Product Availability:</strong> I was curious about which platform offered the most products. I created a pivot table and a bar chart to see the number of products available in each category for the four main competitors: Snapdeal, Amazon, Flipkart, and Paytm. This showed that Snapdeal had a significantly larger catalog in categories like Appliances and Computers & Components.</li>
+                <li><strong>Analyzing Discount Strategies:</strong> This was the core of the project. I wanted to see if Snapdeal was being beaten on price. First, I found the source that offered the highest 'Max Discount' for each category. Then, I created a comparison table showing that top discount alongside the best discount Snapdeal offered for the same category. The bar chart I generated from this data was really insightful. It showed the average difference between Snapdeal's discount and the competitor's higher discount. A positive bar meant that, on average, the competitor's discount was that much bigger than Snapdeal's. For example, in the Gaming category, competitors like Paytm were offering discounts that were, on average, almost 60% better than Snapdeal's.</li>
+                <li><strong>Stock Status Insights:</strong> Finally, I looked at stock availability. I created line plots for some of the less common categories, like 'Binoculars & Telescopes' and 'Office Equipment', to track how many items were in and out of stock on a daily basis across the different platforms. This provided a quick look into who was managing their inventory better for these niche products.</li>
+            </ul>
+
+            <h3>Conclusion Drawn</h3>
+            <p>While Snapdeal excels in the sheer volume of its product listings, especially in major categories, there are clear opportunities for it to become more competitive in its pricing. In several categories, particularly Gaming and Appliances, platforms like Paytm and Flipkart were offering significantly more attractive discounts during the period I analyzed. This kind of analysis could help Snapdeal pinpoint specific areas to adjust its pricing strategy to better compete in the market.</p>
+
+            <hr class="my-8 border-gray-300">
+
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Actionable Insights</h2>
+            <p>Actionable insights that can directly inform business decision-making:</p>
+            
+            <h3>1. Strategic Pricing and Discount Optimization</h3>
+            <p><strong>Observation:</strong> The most significant insight is that Snapdeal is not the most aggressive discounter across several key categories. Competitors like Paytm, Flipkart, and Amazon are offering deeper maximum discounts in high-interest areas like Appliances, Gaming, and Musical Instruments. The analysis even quantifies this, showing instances where competitor discounts are, on average, significantly higher than Snapdeal's.</p>
+            <p><strong>Actionable Decisions:</strong></p>
+            <ul>
+                <li><strong>Targeted Competitive Analysis:</strong> The Category Management team should conduct a granular review of the specific product categories where the discount gap is largest (e.g., Gaming, Appliances). This would involve identifying the exact products where competitors are winning on price.</li>
+                <li><strong>Dynamic Pricing Models:</strong> Implement or refine dynamic pricing algorithms for these categories. The goal would be to monitor competitor prices in near real-time and adjust Snapdeal's offers to be more competitive, especially during promotional periods.</li>
+                <li><strong>Supplier Negotiations:</strong> The data provides leverage for the procurement team to renegotiate costs with suppliers in these underperforming categories. Demonstrating that competitors are offering the same products at lower prices can be a powerful tool in securing better wholesale costs, which would allow for more aggressive retail discounts.</li>
+                <li><strong>Promotional Campaigns:</strong> The marketing team can use this information to design targeted campaigns. For categories where Snapdeal is offering the best discount, they can launch "Price Leader" or "Best Deal" promotions. For categories where they are not, they could consider price-matching guarantees or exclusive bundle offers.</li>
+            </ul>
+
+            <h3>2. Leverage Catalog Breadth as a Competitive Advantage</h3>
+            <p><strong>Observation:</strong> The analysis clearly shows that Snapdeal has a superior number of product listings in high-volume categories like Appliances and Computers & Components when compared to Amazon, Flipkart, and Paytm. This is a major strength.</p>
+            <p><strong>Actionable Decisions:</strong></p>
+            <ul>
+                <li><strong>Marketing Messaging:</strong> Marketing efforts should heavily emphasize this strength. Campaigns themed around "The Widest Selection," "Your One-Stop Shop," or "Everything You Need for Your Home" can be directly substantiated by this data.</li>
+                <li><strong>On-Site User Experience:</strong> With a larger catalog, it's crucial that the on-site search and filtering capabilities are top-notch. The UX team can focus on improving product discovery in these dense categories to ensure customers aren't overwhelmed and can easily find what they're looking for.</li>
+                <li><strong>Seller Acquisition:</strong> This data is a valuable asset for the team responsible for onboarding new sellers. They can show potential sellers that Snapdeal is the leading platform for product volume in their specific category, indicating a larger potential customer base.</li>
+            </ul>
+
+            <h3>3. Enhance Inventory and Stock Management Strategy</h3>
+            <p><strong>Observation:</strong> The analysis of stock status indicates varying levels of product availability across platforms. While some competitors show high "Out of Stock" numbers for certain categories, others (like Flipkart) effectively use a "Coming Soon" status for some products. Snapdeal's data shows a significant number of products "In Stock" but also a notable amount with "NA" status, where availability isn't clearly indicated.</p>
+            <p><strong>Actionable Decisions:</strong></p>
+            <ul>
+                <li><strong>Capture Competitor Stockouts:</strong> An automated alert system could be developed to identify when a popular product is out of stock on a competitor's site. If Snapdeal has the item, targeted ads can be deployed to capture that immediate demand.</li>
+                <li><strong>Improve Stock Status Communication:</strong> The "NA" status should be minimized. This requires stricter data input standards for sellers. For users, an "NA" is a dead end. Replacing it with "Out of Stock" or a "Notify Me" option is a much better user experience.</li>
+                <li><strong>Adopt "Coming Soon" Feature:</strong> Like Flipkart, Snapdeal could implement a "Coming Soon" or pre-order feature. This helps gauge demand for new products before committing to large inventory orders and creates marketing buzz.</li>
+            </ul>
+
+            <h3>Final Say</h3>
+            <p>The analysis suggests a dual approach for Snapdeal: aggressively match competitor pricing in discount-sensitive categories while aggressively marketing its superior catalog depth in categories where it leads in volume.</p>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+            const achievementDescriptionDiv = document.getElementById('achievement-description');
+            const hamburgerIconCanvas = document.getElementById('hamburger-icon');
+            const htx = hamburgerIconCanvas.getContext('2d');
+
+            // Set up all modals
+            const modals = {
+                'fraud-detection': document.getElementById('fraud-detection-modal'),
+                'customer-segmentation': document.getElementById('customer-segmentation-modal'),
+                'snapdeal-analysis': document.getElementById('snapdeal-analysis-modal')
+            };
+
+            // Add click listener to all "View Approach" buttons
+            document.querySelectorAll('.view-approach-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    const projectId = button.dataset.project;
+                    if (modals[projectId]) {
+                        modals[projectId].classList.add('show');
+                    }
+                });
+            });
+
+            // Add close functionality to all modals
+            Object.values(modals).forEach(modal => {
+                if (modal) {
+                    // Close via the 'x' button
+                    const closeButton = modal.querySelector('.modal-close');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', () => {
+                            modal.classList.remove('show');
+                        });
+                    }
+                    // Close by clicking the overlay
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.classList.remove('show');
+                        }
+                    });
+                }
+            });
+
+
+            mobileMenuButton.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                drawHamburgerIcon(mobileMenu.classList.contains('hidden') ? 'menu' : 'close');
+            });
+
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if(this.getAttribute('href').length > 1) {
+                         e.preventDefault();
+                        document.querySelector(this.getAttribute('href')).scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                        if (!mobileMenu.classList.contains('hidden')) {
+                            mobileMenu.classList.add('hidden');
+                            drawHamburgerIcon('menu');
+                        }
+                    }
+                });
+            });
+
+            function drawHamburgerIcon(state) {
+                htx.clearRect(0, 0, 24, 24);
+                htx.fillStyle = '#212529';
+                if (state === 'menu') {
+                    htx.fillRect(0, 3, 24, 4);
+                    htx.fillRect(0, 10, 24, 4);
+                    htx.fillRect(0, 17, 24, 4);
+                } else {
+                    htx.save();
+                    htx.translate(12, 12);
+                    htx.rotate(Math.PI / 4);
+                    htx.fillRect(-12, -2, 24, 4);
+                    htx.rotate(-Math.PI / 2);
+                    htx.fillRect(-12, -2, 24, 4);
+                    htx.restore();
+                }
+            }
+            drawHamburgerIcon('menu');
+
+            const achievementsDescriptions = [
+                "Developed a predictive pricing model for 20,000+ port pairs across 5 countries, significantly raising conversion by 66% and profit by 8.2%. This demonstrates strong analytical and modeling capabilities.",
+                "Developed 12+ Python scripts for automated rate trend analysis and outlier detection, saving over 60 hours per month. This highlights efficiency, automation expertise, and a focus on operational improvements.",
+                "Built and deployed 9 real-time KPI dashboards using SQL to track 25 critical shipment health metrics across 5 departments. This showcases strong data visualization, SQL, and business intelligence skills.",
+                "Reduced Turnaround Time (TAT) by 80% and customer churn by 25% by implementing personalized pricing and retention strategies. This emphasizes direct business impact and strategic problem-solving.",
+                "Automated rate revert tasks for trade lanes, achieving a 60% fulfillment rate and generating $11.5 million in annual revenue. This demonstrates significant financial impact through process automation.",
+                "Designed pricing Standard Operating Procedures (SOPs) across 15+ services, resulting in a 12% revenue boost through process standardization. This highlights strategic thinking and process improvement capabilities.",
+                "Conducted ad-hoc SQL analysis to identify 4 operational bottlenecks, leading to a 6% error reduction via corrective measures. This showcases proactive problem identification and resolution through data analysis."
+            ];
+
+            const achievementsData = {
+                labels: ['Conversion Rate', 'Profit Margin', 'TAT Reduction', 'Churn Reduction', 'Revenue Generation', 'Revenue Boost', 'Error Reduction'],
+                datasets: [{
+                    label: 'Percentage/Value Impact',
+                    data: [66, 8.2, 80, 25, 11.5, 12, 6],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.6)', /* Blue */
+                        'rgba(75, 192, 192, 0.6)', /* Teal */
+                        'rgba(255, 206, 86, 0.6)', /* Yellow */
+                        'rgba(255, 99, 132, 0.6)', /* Red */
+                        'rgba(153, 102, 255, 0.6)', /* Purple */
+                        'rgba(255, 159, 64, 0.6)', /* Orange */
+                        'rgba(100, 200, 100, 0.6)' /* Green */
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(100, 200, 100, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const achievementsCtx = document.getElementById('achievementsChart').getContext('2d');
+            const achievementsChart = new Chart(achievementsCtx, {
+                type: 'bar',
+                data: achievementsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y + (context.label === 'Revenue Generation' ? 'M' : '%');
+                                    }
+                                    return label;
+                                }
+                            },
+                            mode: 'index',
+                            intersect: false,
+                            onHover: function(event, chartElements) {
+                                if (chartElements.length > 0) {
+                                    const index = chartElements[0].index;
+                                    achievementDescriptionDiv.innerHTML = `<p>${achievementsDescriptions[index]}</p>`;
+                                } else {
+                                    achievementDescriptionDiv.innerHTML = '<p>Hover over or click a bar in the chart above to learn more about each achievement.</p>';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Impact Value' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Metrics' },
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: 0,
+                                minRotation: 0,
+                                callback: function(value, index, ticks) {
+                                    const label = this.getLabelForValue(value);
+                                    return label.split(' ');
+                                }
+                            }
+                        }
+                    },
+                    onClick: function(event, chartElements) {
+                        if (chartElements.length > 0) {
+                            const index = chartElements[0].index;
+                            achievementDescriptionDiv.innerHTML = `<p>${achievementsDescriptions[index]}</p>`;
+                        }
+                    }
+                }
+            });
+
+            const programmingSkillsData = {
+                labels: ['Python', 'SQL', 'C/C++', 'JavaScript', 'HTML/CSS'],
+                datasets: [{
+                    label: 'Proficiency',
+                    data: [95, 90, 80, 75, 85],
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const programmingSkillsCtx = document.getElementById('programmingSkillsChart').getContext('2d');
+            new Chart(programmingSkillsCtx, {
+                type: 'bar',
+                data: programmingSkillsData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    return `${label}: ${context.parsed.x}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { x: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            const dataToolsSkillsData = {
+                labels: ['Power BI', 'Tableau', 'Jupyter', 'MongoDB', 'PostgreSQL/MySQL'],
+                datasets: [{
+                    label: 'Proficiency',
+                    data: [50, 50, 95, 80, 85], // Decreased Power BI and Tableau to 50%
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const dataToolsSkillsCtx = document.getElementById('dataToolsSkillsChart').getContext('2d');
+            new Chart(dataToolsSkillsCtx, {
+                type: 'bar',
+                data: dataToolsSkillsData,
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    return `${label}: ${context.parsed.x}%`;
+                                }
+                            }
+                        }
+                    },
+                    scales: { x: { beginAtZero: true, max: 100 } }
+                }
+            });
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.5
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === '#' + entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            // Gemini API Integration for Project Insights
+            const generateInsightButtons = document.querySelectorAll('.generate-insight-btn');
+            generateInsightButtons.forEach(button => {
+                button.addEventListener('click', async function() {
+                    const projectDescriptionElement = this.parentElement.querySelector('.project-description');
+                    const insightOutputDiv = this.parentElement.querySelector('.insight-text');
+                    const originalButtonText = this.innerHTML;
+
+                    insightOutputDiv.innerHTML = '<span class="loading-spinner"></span> Generating insight...';
+                    this.disabled = true;
+
+                    const prompt = `Based on the following project description, generate a concise, impactful business insight or key takeaway (1-2 sentences) that highlights the project's value for a business analyst role:\n\n"${projectDescriptionElement.textContent}"`;
+
+                    let chatHistory = [];
+                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    const payload = { contents: chatHistory };
+                    const apiKey = ""; // Leave as-is. Canvas will provide it.
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+                    try {
+                        let response;
+                        let retryCount = 0;
+                        const maxRetries = 3;
+                        const initialDelay = 1000; // 1 second
+
+                        while (retryCount < maxRetries) {
+                            response = await fetch(apiUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            if (response.ok) {
+                                break; // Success, exit loop
+                            } else if (response.status === 429) { // Too Many Requests
+                                const delay = initialDelay * Math.pow(2, retryCount);
+                                await new Promise(resolve => setTimeout(resolve, delay));
+                                retryCount++;
+                            } else {
+                                throw new Error(`API error: ${response.status} ${response.statusText}`);
+                            }
+                        }
+
+                        if (!response.ok) {
+                            throw new Error('Failed to fetch from API after multiple retries.');
+                        }
+
+                        const result = await response.json();
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            insightOutputDiv.innerHTML = text;
+                        } else {
+                            insightOutputDiv.innerHTML = 'Could not generate insight. Please try again.';
+                        }
+                    } catch (error) {
+                        insightOutputDiv.innerHTML = `Error: ${error.message}`;
+                    } finally {
+                        this.disabled = false;
+                        this.innerHTML = originalButtonText;
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
