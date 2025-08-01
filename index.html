@@ -47,16 +47,6 @@
         .nav-link.active {
             @apply text-blue-700 font-semibold border-b-2 border-blue-700;
         }
-        .insight-text {
-            min-height: 50px; /* Ensure space for insight */
-            background-color: #e0f2fe; /* Light blue background for insights */
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-            font-style: italic;
-            color: #0c4a6e;
-            border: 1px solid #90cdf4;
-        }
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #3b82f6;
@@ -256,25 +246,19 @@
                     <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
                         <h3 class="text-xl font-semibold mb-2">Credit Card Fraud Detection</h3>
                         <p class="text-gray-600 mb-4 project-description">Built a Logistic Regression model with 90% accuracy to detect fraudulent transactions using imbalanced datasets. Preprocessed data with outlier detection, under-sampling, and feature scaling.</p>
-                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
-                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="fraud-detection">View Approach</button>
-                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-4" data-project="fraud-detection">View Approach</button>
                         <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
                         <h3 class="text-xl font-semibold mb-2">Customer Segmentation</h3>
                         <p class="text-gray-600 mb-4 project-description">Built a K-Means clustering model to segment customers, enabling targeted marketing based on spending data. Analyzed cluster inertia using the Elbow method to find the optimal number of clusters.</p>
-                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
-                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="customer-segmentation">View Approach</button>
-                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-4" data-project="customer-segmentation">View Approach</button>
                         <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
                     </div>
                     <div class="bg-white rounded-xl shadow-lg p-6 transform hover:-translate-y-2 transition-transform duration-300">
                         <h3 class="text-xl font-semibold mb-2">Snapdeal Competitive Analysis</h3>
                         <p class="text-gray-600 mb-4 project-description">Performed cross-platform data comparison, analyzing categories, inventory, and discount metrics. Analyzed historical prices to identify trends and generate business hypotheses.</p>
-                        <button class="generate-insight-btn bg-purple-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-purple-700 transition-transform transform hover:scale-105 mt-2">Generate Insight ✨</button>
-                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-2 ml-2" data-project="snapdeal-analysis">View Approach</button>
-                        <div class="insight-text mt-4 text-sm text-gray-700"></div>
+                        <button class="view-approach-btn bg-blue-600 text-white text-sm py-2 px-4 rounded-lg hover:bg-blue-700 transition-transform transform hover:scale-105 mt-4" data-project="snapdeal-analysis">View Approach</button>
                         <a href="https://github.com/PrincyGit" target="_blank" class="text-blue-600 font-semibold hover:underline block mt-4">View on GitHub &rarr;</a>
                     </div>
                 </div>
@@ -773,68 +757,34 @@
                 observer.observe(section);
             });
 
-            // Gemini API Integration for Project Insights
-            const generateInsightButtons = document.querySelectorAll('.generate-insight-btn');
-            generateInsightButtons.forEach(button => {
-                button.addEventListener('click', async function() {
-                    const projectDescriptionElement = this.parentElement.querySelector('.project-description');
+            // Pre-written insights for each project
+            const projectInsights = {
+                'fraud-detection': "Insight: Handling imbalanced data through methods like under-sampling is critical for building a fraud detection model that can accurately identify rare fraudulent activities.",
+                'customer-segmentation': "Insight: K-Means clustering on spending data reveals distinct customer personas, enabling targeted marketing strategies to maximize engagement and sales.",
+                'snapdeal-analysis': "Insight: Analyzing competitor pricing and catalog depth provides actionable intelligence to optimize pricing strategies and highlight key market advantages."
+            };
+
+            // Event listener for the "Generate Insight" buttons
+            document.querySelectorAll('.generate-insight-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const projectId = this.dataset.project;
                     const insightOutputDiv = this.parentElement.querySelector('.insight-text');
                     const originalButtonText = this.innerHTML;
+                    const insight = projectInsights[projectId];
 
                     insightOutputDiv.innerHTML = '<span class="loading-spinner"></span> Generating insight...';
                     this.disabled = true;
 
-                    const prompt = `Based on the following project description, generate a concise, impactful business insight or key takeaway (1-2 sentences) that highlights the project's value for a business analyst role:\n\n"${projectDescriptionElement.textContent}"`;
-
-                    let chatHistory = [];
-                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                    const payload = { contents: chatHistory };
-                    const apiKey = ""; // Leave as-is. Canvas will provide it.
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                    try {
-                        let response;
-                        let retryCount = 0;
-                        const maxRetries = 3;
-                        const initialDelay = 1000; // 1 second
-
-                        while (retryCount < maxRetries) {
-                            response = await fetch(apiUrl, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify(payload)
-                            });
-
-                            if (response.ok) {
-                                break; // Success, exit loop
-                            } else if (response.status === 429) { // Too Many Requests
-                                const delay = initialDelay * Math.pow(2, retryCount);
-                                await new Promise(resolve => setTimeout(resolve, delay));
-                                retryCount++;
-                            } else {
-                                throw new Error(`API error: ${response.status} ${response.statusText}`);
-                            }
-                        }
-
-                        if (!response.ok) {
-                            throw new Error('Failed to fetch from API after multiple retries.');
-                        }
-
-                        const result = await response.json();
-                        if (result.candidates && result.candidates.length > 0 &&
-                            result.candidates[0].content && result.candidates[0].content.parts &&
-                            result.candidates[0].content.parts.length > 0) {
-                            const text = result.candidates[0].content.parts[0].text;
-                            insightOutputDiv.innerHTML = text;
+                    // Simulate a delay for a better user experience
+                    setTimeout(() => {
+                        if (insight) {
+                            insightOutputDiv.innerHTML = insight;
                         } else {
-                            insightOutputDiv.innerHTML = 'Could not generate insight. Please try again.';
+                            insightOutputDiv.innerHTML = 'Insight for this project is not available yet.';
                         }
-                    } catch (error) {
-                        insightOutputDiv.innerHTML = `Error: ${error.message}`;
-                    } finally {
                         this.disabled = false;
                         this.innerHTML = originalButtonText;
-                    }
+                    }, 1000); // 1-second delay
                 });
             });
         });
